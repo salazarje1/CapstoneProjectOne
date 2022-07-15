@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+    <h1>Home Page</h1>
+
+
+    <form id="form">
+        <div class="form-group">
+            <input type="email" class="form-control" name="email">
+        </div>
+        <button class="btn btn-primary">Check Email</button>
+    </form>
+
+
+    <div id="simpleEmailCheck"></div>
+
+    <script src="/static/javascript/index.js"></script>
+{% endblock %}
