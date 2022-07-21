@@ -1,5 +1,6 @@
 import requests
-from secrets import API_KEY
+
+API_KEY = os.environ.get('API_KEY')
 
 
 # Home Page
