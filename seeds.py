@@ -1,4 +1,4 @@
-from models import db, connect_db, User, Password, VulnPassword
+from models import db
 from app import app
 
 
