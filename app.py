@@ -3,7 +3,6 @@ from flask import Flask, render_template, redirect, session, flash, request, jso
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Password, VulnPassword, VulnEmail
 from forms import RegisterForm, LoginForm, EditForm, ChangePassword, HomePageEmailCheck
-from secrets import SECRET_KEY
 from api import simple_check, email_check, password_check
 from database import register_user, update_user, update_password, deleting, adding_resource
 from helper import password_setup
@@ -16,7 +15,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "ABC123"
 app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', SECRET_KEY)
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'ThisIsASecret')
+
+API_KEY = os.environ.get('API_KEY')
 
 connect_db(app)
 
