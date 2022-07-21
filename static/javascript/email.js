@@ -10,13 +10,15 @@ emailUl.addEventListener('click', async (e) => {
         breachData.innerHTML = ''; 
 
         const emailId = e.target.dataset['email'];
-
+        const div = e.target.parentElement.previousSibling.previousSibling;
         const res = await axios.get(`/emails/${emailId}/check`)
 
         if(res.status === 200){
+            updateEmailStatus('text-danger', div);
             appendToPage(res);
         } else if (res.status === 204){
-            appendSafeToPage(res)
+            updateEmailStatus('text-success', div);
+            appendSafeToPage(res);
         }
 
     }

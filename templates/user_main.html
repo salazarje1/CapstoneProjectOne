@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block file %}/static/css/user.css{% endblock %}
 
 {% block title %}{{user.username}}{% endblock %}
 
@@ -20,7 +21,7 @@
         <input type="text" class="form-control" id="email" name="email" placeholder="Email">
         <small class="form-text text-muted">Email will be saved, and can be checked whenever you would like.</small>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary">Add Email</button>
 </form>
 
 <h2 class="mt-5">Your Emails</h2>
@@ -34,8 +35,10 @@
         <div>
             {% if email.breached == 'true': %}
             <span class="text-danger">Breached</span>
-            {% else: %}
+            {% elif email.breached == 'false': %}
             <span class="text-success">Safe</span>
+            {% else: %}
+            <span id="breach-status">Pending</span>
             {% endif %}
         </div>
         <div>

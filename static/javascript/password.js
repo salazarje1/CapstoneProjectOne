@@ -3,8 +3,7 @@ const passwordInfo = document.querySelector('#passwordInfo');
 
 passwordUl.addEventListener('click', async (e) => {
     if (e.target.id === 'passwordButton'){
-        e.preventDefault()
-        console.log(e.target.id)
+        e.preventDefault();
 
         passwordInfo.innerHTML = ''; 
 
@@ -13,7 +12,6 @@ passwordUl.addEventListener('click', async (e) => {
         const div = e.target.parentElement.previousSibling.previousSibling;
 
         const res = await axios.get(`/passwords/${passwordId}/check`)
-        console.log(res);
 
         if (res.status === 200){
             updateStatus('text-danger', div);

@@ -1,10 +1,11 @@
 from flask import Flask, render_template, redirect, session, flash, request, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-import requests
-from hashlib import sha1
 from models import db, connect_db, User, Password, VulnPassword, VulnEmail
 from forms import RegisterForm, LoginForm, EditForm, ChangePassword, HomePageEmailCheck
-from secrets import API_KEY, SECRET_KEY
+from secrets import SECRET_KEY
+from api import simple_check, email_check, password_check
+from database import register_user, update_user, update_password, deleting, adding_resource
+from helper import password_setup
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -20,8 +21,7 @@ connect_db(app)
 
 toolbar = DebugToolbarExtension(app)
 
-
-
+# Add http methods 
 
 @app.route('/')
 def home_page():
@@ -34,23 +34,18 @@ def home_page():
 
 @app.route('/simple-check/<email>')
 def home_email_check(email):
-    resp = requests.get(f'https://haveibeenpwned.com/api/v3/breachedaccount/{email}',
-        headers={
-            'hibp-api-key': API_KEY
-        }
-    )
+    resp = simple_check(email)
 
     if resp.status_code == 200: 
         data = resp.json()
-
         return jsonify(data)
-    elif resp.status_code == 404:
 
+    elif resp.status_code == 404:
         return jsonify('not breached'), 204
 
     
 
-
+# Register Routes
 @app.route('/register', methods=["GET", "POST"])
 def user_register():
     if 'user_id' in session: 
@@ -59,24 +54,22 @@ def user_register():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        first_name = form.first_name.data
-        last_name = form.last_name.data
-        username = form.username.data
-        email = form.email.data
-        password = form.password.data
+        try:
+            new_user = register_user(
+                form.first_name.data,
+                form.last_name.data,
+                form.username.data,
+                form.email.data,
+                form.password.data
+            )
 
-        new_user = User.register(username, first_name, last_name, email)
-        db.session.add(new_user)
-        db.session.commit()
+            session['user_id'] = new_user.username
 
-        password = Password.register(new_user.id, password)
-        db.session.add(password)
-        db.session.commit()
-
-        session['user_id'] = new_user.username
-
-        flash('Welcome! Successfully created your account')
-        return redirect(f'/users/{new_user.username}')
+            flash('Welcome! Successfully created your account')
+            return redirect(f'/users/{new_user.username}')
+        except:
+            db.session.rollback()
+            flash('Username in use. Please try a different one.')
 
     return render_template('register.html', form=form)
 
@@ -92,11 +85,15 @@ def user_login():
         username = form.username.data
         password = form.password.data
 
-        user = Password.authenticate(username, password)
+        user = User.query.filter_by(username=username).first()
         if user: 
-            flash(f"Welcome back, {user.first_name}!")
-            session['user_id'] = user.username
-            return redirect(f'/users/{username}')
+            user = Password.authenticate(username, password)
+            if user: 
+                flash(f"Welcome back, {user.first_name}!")
+                session['user_id'] = user.username
+                return redirect(f'/users/{username}')
+            else:
+                form.username.errors = {'Invalid username/password.'}
         else:
             form.username.errors = {'Invalid username/password.'}
 
@@ -105,7 +102,7 @@ def user_login():
 @app.route('/logout', methods=["POST"])
 def user_logout():
     session.pop('user_id')
-    flash('Succefully logged out.')
+    flash('Successfully logged out.')
     return redirect('/')
 
 
@@ -145,16 +142,17 @@ def user_edit(username):
         form = EditForm(obj=user)
 
         if form.validate_on_submit():
-            user.first_name = form.first_name.data
-            user.last_name = form.last_name.data
-            user.email = form.email.data
-
-            db.session.commit()
+            update_user(
+                user,
+                form.first_name.data,
+                form.last_name.data,
+                form.email.data
+            )
             return redirect(f'/users/{user.username}/account')
 
         return render_template('user_edit.html', user=user, form=form)
     
-    return redirect('/')
+    return redirect('/login')
 
 @app.route('/users/<username>/change', methods=["GET", "POST"])
 def user_change_password(username):
@@ -167,18 +165,16 @@ def user_change_password(username):
         form = ChangePassword()
 
         if form.validate_on_submit():
-            old_password = form.old_password.data
-            new_password = form.password.data
-
-            user = Password.authenticate(user.username, old_password)
-            if user: 
-                user.passwd[0].password = Password.new_password(new_password)
-                db.session.commit()
-
+            update_status = update_password(
+                user, 
+                form.old_password.data,
+                form.password.data
+            )
+            if update_status: 
                 flash('Successfully changed your password.')
                 return redirect(f"/users/{user.username}/account")
             else: 
-                form.old_password.errors = ['Invalid password/passwords dont match']
+                form.old_password.errors = ['Invalid password/passwords do not match']
 
         return render_template('user_change_password.html', user=user, form=form)
 
@@ -192,8 +188,7 @@ def user_delete(username):
 
     user = User.query.filter_by(username=username).first_or_404()
     if user.username == session['user_id']:
-        db.session.delete(user)
-        db.session.commit()
+        deleting(user)
         session.pop('user_id')
         flash('Successfully delete account.')
         return redirect('/')
@@ -213,12 +208,8 @@ def adding_emails(username):
 
     if request.method == 'POST': 
         if user.username == session['user_id']:
-            id = user.id
             email = request.form['email']
-
-            new_email = VulnEmail(userId=id, email=email)
-            db.session.add(new_email)
-            db.session.commit()
+            adding_resource(user, email, 'email')
 
             return redirect(f'/users/{user.username}')
         
@@ -233,9 +224,7 @@ def delete_emails(id):
 
     email = VulnEmail.query.get_or_404(id)
     if email.users.username == session['user_id']:
-        db.session.delete(email)
-        db.session.commit()
-
+        deleting(email)
         return redirect(f'/users/{email.users.username}')
 
     return redirect('/')
@@ -249,22 +238,14 @@ def check_email(id):
 
     email = VulnEmail.query.get_or_404(id)
 
-    resp = requests.get(f'https://haveibeenpwned.com/api/v3/breachedaccount/{email.email}', 
-        params={
-            'truncateResponse':'false'
-        },
-        headers={
-            'hibp-api-key':API_KEY
-        }
-    )
+    [data, status_code] = email_check(email.email)
 
-    if resp.status_code == 200: 
-        data = resp.json()
+    if status_code == 200:
         email.breached = True
         db.session.commit()
 
         return jsonify(data)
-    elif resp.status_code == 404:
+    elif status_code == 404:
         email.breached = False
         db.session.commit()
 
@@ -284,12 +265,8 @@ def adding_passwords(username):
 
     if request.method =='POST':
         if user.username == session['user_id']:
-            id = user.id
             password = request.form['password']
-
-            new_password = VulnPassword(userId=id, password=password)
-            db.session.add(new_password)
-            db.session.commit()
+            adding_resource(user, password, 'password')
 
             return redirect(f'/users/{user.username}/passwords')
 
@@ -303,9 +280,7 @@ def delete_passwords(id):
 
     password = VulnPassword.query.get_or_404(id)
     if password.users.username == session['user_id']:
-        db.session.delete(password)
-        db.session.commit()
-
+        deleting(password)
         return redirect(f'/users/{password.users.username}/passwords')
 
     return redirect('/')
@@ -319,31 +294,19 @@ def check_passwords(id):
         return redirect('/login')
 
     password = VulnPassword.query.get_or_404(id)
-    passwd = password.password.encode()
-    hashed_pass_obj = sha1(passwd)
-    hashed_pass = hashed_pass_obj.hexdigest()
+    [first_part, second_part] = password_setup(password)
 
-    first_part = hashed_pass[:5]
-    second_part = hashed_pass[5:].upper()
+    data = password_check(first_part, second_part)
 
-    resp = requests.get(f'https://api.pwnedpasswords.com/range/{first_part}')
-
-    data = resp.text
-    data = data.splitlines()
-
-    for d in data: 
-        [hash, count] = d.split(':')
-        if str(second_part) == hash: 
-            password.vulnerable = True
-            db.session.commit()
-            return jsonify(data=count)
-
-
-    print('===================')
-    print('Checked safe')
-    password.vulnerable = False
-    db.session.commit()
-    return jsonify('safe'), 204
+    if data:
+        password.vulnerable = True
+        db.session.commit()
+        return jsonify(data=data)
+    
+    else: 
+        password.vulnerable = False
+        db.session.commit()
+        return jsonify('safe'), 204
 
 
 

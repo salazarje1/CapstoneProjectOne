@@ -44,6 +44,19 @@ function handleData(data) {
     return div;
 }
 
+function updateEmailStatus(text, div){
+    p = document.createElement('p');
+    if(text === 'text-danger'){
+        p.classList.add('text-danger');
+        p.innerHTML = 'Breached'
+    } else if(text === 'text-success'){
+        p.classList.add('text-success');
+        p.innerText = 'Safe'
+    }
+    div.innerHTML = '';
+    div.appendChild(p);
+}
+
 
 // Password Helper functions
 

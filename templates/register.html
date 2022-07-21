@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
+{% block file %}/static/css/index.css{% endblock %}
 
 {% block title %}Register{% endblock %}
 
 {% block content %}
 
-    <h1>Sign Up</h1>
-    <p class="lead">Register to access our site</p>
+    <h1 id="register-heading">Sign Up</h1>
+    <p class="lead text-muted register-text">Register to access our site</p>
 
     <form method="POST">
         {{form.hidden_tag()}}
 
         {% for field in form if field.widget.input_type != 'hidden': %}
-        <div class="form-group">
-            {{field.label}}
-            {{field(class_="form-control")}}
+        <div class="form-group login-div">
+            {{field.label(class_="register-text text-center")}}
+            {{field(class_="form-control register-inputs")}}
             
             <span class="form-text text-danger">
                 {% for error in field.errors %}
@@ -23,7 +24,9 @@
 
         </div>
         {% endfor %}
-        <button class="btn btn-primary">Register</button>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-primary register-btn">Register</button>
+        </div>
     </form>
 
 {% endblock %}

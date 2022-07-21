@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block file %}/static/css/user.css{% endblock %}
 
 {% block title %}Account{% endblock %}
 
@@ -11,9 +12,12 @@
 <p>Last Name: {{user.last_name}}</p>
 <p>Email: {{user.email}}</p>
 
-<a href="/users/{{user.username}}/edit" class="btn btn-secondary">Edit Account</a>
-<a href="/users/{{user.username}}/change" class="btn btn-warning">Change Password</a>
-<form class="d-inline" action="/users/{{user.username}}/delete" method="POST">
-    <button class="btn btn-danger">Delete Account</button>
-</form>
+<div class="account-btn">
+    <a href="/users/{{user.username}}/edit" class="btn btn-secondary">Edit Account</a>
+    <a href="/users/{{user.username}}/change" class="btn btn-warning">Change Password</a>
+    <form class="d-inline" action="/users/{{user.username}}/delete" method="POST">
+        <button class="btn btn-danger">Delete Account</button>
+    </form>
+
+</div>
 {% endblock %}

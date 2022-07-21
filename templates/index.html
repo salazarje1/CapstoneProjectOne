@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
+{% block file %}/static/css/index.css{% endblock %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 
-    <h1>Home Page</h1>
+    <h1 class="home">HAVE YOU BEEN BREACHED</h1>
 
 
-    <form id="form">
-        <div class="form-group">
-            <input type="email" class="form-control" name="email">
+    <form id="form" class="home">
+        <div class="form-group home">
+            <input type="email" class="form-control home" name="email" placeholder="Enter Email...">
         </div>
-        <button class="btn btn-primary">Check Email</button>
+        <div class="d-flex justify-content-center home">
+            <button class="btn home">Check Email</button>
+        </div>
     </form>
 
 
-    <div id="simpleEmailCheck"></div>
+    <div id="simpleEmailCheck" class="home"></div>
 
     <script src="/static/javascript/index.js"></script>
 {% endblock %}

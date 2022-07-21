@@ -1,17 +1,18 @@
 {% extends 'base.html' %}
+{% block file %}/static/css/index.css{% endblock %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
 
     <h1>Login</h1>
-    <p class="lead">Login in below or register <a href="/register">HERE</a></p>
+    <p class="lead text-muted login-text">Login in below or register <a href="/register">HERE</a></p>
 
     <form method="POST">
         {{form.hidden_tag()}}
 
         {% for field in form if field.widget.input_type != 'hidden': %}
-        <div class="form-group">
+        <div class="form-group login-div">
             {{field.label}}
             {{field(class_="form-control")}}
             
@@ -23,7 +24,9 @@
 
         </div>
         {% endfor %}
-        <button class="btn btn-primary">Login</button>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-primary">Login</button>
+        </div>
     </form>
 
 {% endblock %}

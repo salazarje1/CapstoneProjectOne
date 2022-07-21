@@ -1,0 +1,45 @@
+
+nav {
+    background-color: rgba(0, 0, 0, .5);
+    height: 5rem;
+}
+
+nav a, nav .nav-link {
+    font-size: 1.3rem;
+}
+
+
+
+@media (max-width: 660px){
+
+    .navbar-brand {
+        visibility: hidden;
+    }
+    .navbar-brand:before {
+        visibility: visible;
+        content: 'IV';
+    }
+    
+    nav {
+        height: 100%;
+    }
+
+    .list-group-item {
+        flex-direction: column;
+    }
+
+    .account-btn {
+        display: flex;
+        flex-direction: column;
+        margin: .5rem 0;
+    }
+
+    .account-btn a {
+        margin: .5rem 0;
+    }
+
+    .account-btn button {
+        width: 100%;
+        margin: .5rem 0;
+    }
+}
