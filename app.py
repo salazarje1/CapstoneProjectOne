@@ -17,7 +17,6 @@ uri = os.getenv("DATABASE_URL")
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
-db.create_all()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(uri, "postgresql:///capstone_db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
