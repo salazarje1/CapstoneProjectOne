@@ -1,5 +1,6 @@
 import os
 import re
+import psycopg2
 from flask import Flask, render_template, redirect, session, flash, request, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Password, VulnPassword, VulnEmail
@@ -15,6 +16,8 @@ app = Flask(__name__, static_url_path='/static')
 uri = os.getenv("DATABASE_URL")  
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
+
+db.create_all()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(uri, "postgresql:///capstone_db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
