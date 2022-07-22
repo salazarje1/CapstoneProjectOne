@@ -13,12 +13,12 @@ from helper import password_setup
 app = Flask(__name__, static_url_path='/static')
 
 
-uri = os.getenv("DATABASE_URL")  
+uri = os.environ.get('DATABASE_URL', "postgresql:///capstone_db")
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(uri, "postgresql:///capstone_db")
+app.config["SQLALCHEMY_DATABASE_URI"] = uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "ABC123"
