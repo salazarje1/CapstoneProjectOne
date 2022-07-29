@@ -53,3 +53,4 @@ def adding_resource(user, resource, resource_id):
         db.session.add(new_resource)
         db.session.commit()
 
+        return new_resource

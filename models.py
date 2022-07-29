@@ -10,7 +10,6 @@ def connect_db(app):
     db.app = app
 
 
-
 class User(db.Model):
 
     __tablename__ = 'users'
@@ -74,16 +73,6 @@ class VulnEmail(db.Model):
     breached = db.Column(db.Text, nullable=False, default='pending')
     userId = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'), nullable=False)
 
-    vulnemailinfo = db.relationship('VulnEmailInfo', backref='vulnemails', passive_deletes=True)
-
-
-class VulnEmailInfo(db.Model):
-
-    __tablename__ = 'vulnemailinfos'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    vulnEmailId = db.Column(db.Integer, db.ForeignKey('vulnemails.id', ondelete='cascade'), nullable=False)
-    vulnInfo = db.Column(db.Text, nullable=False, default='Not Found')
 
 class VulnPassword(db.Model):
     
